@@ -1,15 +1,14 @@
 # -----------------------
 # Config
 # -----------------------
-FLINK_JOB_JAR := $(shell \
-	ls -1 target/*.jar 2>/dev/null | grep -v 'original-' | head -n 1 \
-)
+# Use fixed JAR path so "make compile" works on first run (no existing JAR)
+FLINK_JOB_JAR := target/my-flink-project-0.1.jar
 JOBMANAGER_CONTAINER := jobmanager
 
 # -----------------------
 # Phony targets
 # -----------------------
-.PHONY: help up down build clean submit rebuild run
+.PHONY: help up down compile pkg clean submit rebuild run
 
 # -----------------------
 # Help
@@ -18,10 +17,11 @@ help:
 	@echo "Available targets:"
 	@echo "  up       - Start the Flink cluster (docker compose up -d)"
 	@echo "  down     - Stop the Flink cluster (docker compose down)"
-	@echo "  build    - Compile the Flink job JAR"
+	@echo "  compile  - Compile the Flink job JAR"
+	@echo "  pkg      - Same as compile"
 	@echo "  clean    - Clean build artifacts"
 	@echo "  submit   - Submit the job to Flink (builds if needed)"
-	@echo "  rebuild  - Clean + build"
+	@echo "  rebuild  - Clean + compile"
 	@echo "  run      - Start cluster, build JAR, and submit job"
 
 # -----------------------
@@ -37,7 +37,9 @@ down:
 # -----------------------
 # Build
 # -----------------------
-build: $(FLINK_JOB_JAR)
+compile: $(FLINK_JOB_JAR)
+
+pkg: compile
 
 $(FLINK_JOB_JAR):
 	mvn clean package -DskipTests
@@ -45,12 +47,12 @@ $(FLINK_JOB_JAR):
 clean:
 	mvn clean
 
-rebuild: clean build
+rebuild: clean compile
 
 # -----------------------
 # Job submission
 # -----------------------
-submit: build
+submit: compile
 	docker cp $(FLINK_JOB_JAR) $(JOBMANAGER_CONTAINER):/job.jar
 	docker exec $(JOBMANAGER_CONTAINER) flink run /job.jar
 	@echo "Job submitted to Flink cluster."
