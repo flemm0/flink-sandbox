@@ -24,3 +24,6 @@ buildNumber.properties
 
 # MacOS
 .DS_Store
+
+# Metals
+.bloop/
