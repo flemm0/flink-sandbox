@@ -1,8 +1,7 @@
 # -----------------------
 # Config
 # -----------------------
-# Use fixed JAR path so "make compile" works on first run (no existing JAR)
-FLINK_JOB_JAR := target/my-flink-project-0.1.jar
+MVN := mvn
 JOBMANAGER_CONTAINER := jobmanager
 
 # -----------------------
@@ -15,14 +14,20 @@ JOBMANAGER_CONTAINER := jobmanager
 # -----------------------
 help:
 	@echo "Available targets:"
-	@echo "  up       - Start the Flink cluster (docker compose up -d)"
-	@echo "  down     - Stop the Flink cluster (docker compose down)"
-	@echo "  compile  - Compile the Flink job JAR"
-	@echo "  pkg      - Same as compile"
-	@echo "  clean    - Clean build artifacts"
-	@echo "  submit   - Submit the job to Flink (builds if needed)"
-	@echo "  rebuild  - Clean + compile"
-	@echo "  run      - Start cluster, build JAR, and submit job"
+	@echo "  up                     - Start the Flink cluster (docker compose up -d)"
+	@echo "  down                  - Stop the Flink cluster (docker compose down)"
+	@echo "  compile               - Compile the Maven project"
+	@echo "  test                  - Run tests"
+	@echo "  package               - Package project into a JAR file"
+	@echo "  install               - Install JAR to local Maven repository"
+	@echo "  clean                 - Clean build artifacts"
+	@echo "  verify                - Verify project"
+	@echo "  submit                - Submit the job to Flink (builds if needed)"
+	@echo "  rebuild               - Clean and recompile project"
+	@echo "  run                   - Start cluster, build JAR, and submit job"
+	@echo "  logs                  - Print taskmanager logs"
+	@echo "  local-shell           - Start jshell with compiled classes"
+	@echo "  local-shell-with-deps - Start jshell with classes and dependencies"
 
 # -----------------------
 # Docker
@@ -37,17 +42,33 @@ down:
 # -----------------------
 # Build
 # -----------------------
-compile: $(FLINK_JOB_JAR)
+compile:
+	@echo "Compiling Maven project..."
+	$(MVN) compile
 
-pkg: compile
+test: compile
+	@echo "Running tests..."
+	$(MVN) test
 
-$(FLINK_JOB_JAR):
-	mvn clean package -DskipTests
+package: test
+	@echo "Packaging project into a JAR file..."
+	$(MVN) package
+
+install: package
+	@echo "Installing JAR to local Maven repository..."
+	$(MVN) install
 
 clean:
-	mvn clean
+	@echo "Cleaning Maven build artifacts..."
+	$(MVN) clean
 
-rebuild: clean compile
+verify:
+	@echo "Verifying project..."
+	$(MVN) verify
+
+rebuild:
+	@echo "Cleaning and recompiling project..."
+	clean compile
 
 # -----------------------
 # Job submission
@@ -68,3 +89,12 @@ run: up submit
 logs:
 	@echo "Printing taskmanager logs... Press Ctrl+C to exit."
 	docker compose logs -f taskmanager
+
+# -----------------------
+# Local development shell
+# -----------------------
+local-shell:
+	jshell --class-path target/classes
+
+local-shell-with-deps:
+	jshell --class-path "target/classes:target/dependency/*"
