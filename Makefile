@@ -3,6 +3,8 @@
 # -----------------------
 MVN := mvn
 JOBMANAGER_CONTAINER := jobmanager
+FLINK_JOB_JAR := target/my-flink-project-0.1.jar
+JOB_NAME := com.example.flink.jobs.DataStreamJob
 
 # -----------------------
 # Phony targets
@@ -68,14 +70,18 @@ verify:
 
 rebuild:
 	@echo "Cleaning and recompiling project..."
-	clean compile
+	$(MVN) clean compile
+
+download-dep-jars:
+	@echo "Downloading project dependencies..."
+	$(MVN) dependency:copy-dependencies -DoutputDirectory=target/dependency
 
 # -----------------------
 # Job submission
 # -----------------------
 submit: compile
 	docker cp $(FLINK_JOB_JAR) $(JOBMANAGER_CONTAINER):/job.jar
-	docker exec $(JOBMANAGER_CONTAINER) flink run /job.jar
+	docker exec $(JOBMANAGER_CONTAINER) flink run -c $(JOB_NAME) /job.jar
 	@echo "Job submitted to Flink cluster."
 
 # -----------------------
