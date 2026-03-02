@@ -5,7 +5,7 @@ import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 
-import com.example.flink.util.simulator.Dog;
+import com.example.flink.model.DogEvent;
 import com.example.flink.util.DogSource;
 
 
@@ -18,14 +18,11 @@ public class DataStreamJob {
 		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 		env.getConfig().setAutoWatermarkInterval(1000L);
 
-		DataStream<Dog> dogStream = env
+		DataStream<DogEvent> dogStream = env
 			.addSource(new DogSource())
-			.name("Dog Source")
-			.uid("dog-source");
+			.name("Dog Source");
 		
-		dogStream
-			.map((MapFunction<Dog, String>) dog -> "Dog: " + dog.getName() + ", says: " + dog.makeSound())
-			.print();
+		dogStream.print();
 
 		env.execute("Hello Flink Job");
 	}

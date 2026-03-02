@@ -35,6 +35,22 @@ public class Dog {
     return name;
   }
 
+  public String getId() {
+    return id;
+  }
+
+  public String getBreed() {
+    return breed;
+  }
+
+  public String getAge() {
+    return age;
+  }
+
+  public String getGender() {
+    return gender;
+  }
+
   @Override
   public String toString() {
     return "Dog{" +
