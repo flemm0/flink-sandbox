@@ -22,7 +22,11 @@ public class DataStreamJob {
 			.addSource(new DogSource())
 			.name("Dog Source");
 		
-		dogStream.print();
+		dogStream
+			.map((MapFunction<DogEvent, String>) event -> {
+				return "Dog Event: " + event.name + " the " + event.breed + " says " + event.sound;
+			})
+			.print();
 
 		env.execute("Hello Flink Job");
 	}

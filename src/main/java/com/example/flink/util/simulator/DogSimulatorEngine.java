@@ -2,8 +2,9 @@ package com.example.flink.util.simulator;
 
 import com.example.flink.model.DogEvent;
 import java.util.Random;
+import java.io.Serializable;
 
-public class DogSimulatorEngine {
+public class DogSimulatorEngine implements Serializable {
   
   public final DogPool dogPool = new DogPool();
   private Random random = new Random();

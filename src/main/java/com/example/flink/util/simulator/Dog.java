@@ -2,8 +2,9 @@ package com.example.flink.util.simulator;
 
 import com.github.javafaker.Faker;
 import java.util.UUID;
+import java.io.Serializable;
 
-public class Dog {
+public class Dog implements Serializable {
   
   private String id;
   private String name;

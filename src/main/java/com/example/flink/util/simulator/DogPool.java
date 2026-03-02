@@ -1,11 +1,12 @@
 package com.example.flink.util.simulator;
 
 import java.util.*;
+import java.io.Serializable;
 import java.util.Random;
 import com.github.javafaker.Faker;
 import com.example.flink.util.simulator.Dog;
 
-public class DogPool {
+public class DogPool implements Serializable {
   
   public List<Dog> dogs = new ArrayList<>();
 
